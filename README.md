@@ -1,37 +1,97 @@
-# Real Estate Lead Profiling and Management System Backend Task
+# Implementation Notes
 
-> The goal is to design a lead profiling application for real estate rental and sale management. It should import, clean, and analyze lead data from multiple sources, helping agents and managers gain insights into lead preferences, engagement levels, and potential conversion probability.
+## Overview
 
-## Lead Data Collection & import
+This solution implements a Real Estate Lead Profiling and Management System using TypeScript, Express, InversifyJS, and inversify-express-utils.
 
-The candidate should implement an API to import customer data from the provided JSON file:
+The application imports lead data from a JSON file, validates and cleans the data, identifies duplicate leads using phone numbers, generates lead profiles, and provides lead analytics through REST APIs.
 
-- JSON file (representing offline data from multiple sources)
-- Key lead data fields could include lead_id, name, contact, email, phone, property_type (rental or sale), budget, location, preferred_property_type (apartment, house, etc.), contact_date, and inquiry_notes.
+---
 
-### Lead Profiling & cleaning
+## Architecture
 
-- Validate and clean customer data (e.g., ensure email is valid, phone number format is standardized, age is within a reasonable range)
+The project follows a layered architecture:
 
-- Identify and manage duplicate records based on fields like email or phone number (where phone number is the unique parameter)
+* Controllers: Handle HTTP requests and responses.
+* Services: Contain business logic and data processing.
+* Entities: Define the core data models (Lead, LeadProfile).
+* Utilities: Handle validation, cleaning, and metrics calculations.
 
-#### Validate and standardize data fields, such as
+---
 
-- Valid phone numbers and emails
-- Standard budget format and preferred property type
-- Identify duplicate leads using phone number
+## Lead Processing Flow
 
-#### Profiling metrics should include
+### POST /analyze
 
-- Total number of leads
-- Unique location count
-- Average budget range per lead type (rental vs. sale) (🌟 Bonus Point)
-- Average inquiry rate (frequency of leads by timeframe) (🌟 Bonus Point)
+The analysis process performs the following steps:
 
-## API Endpoints
+1. Reads lead data from `sample_lead_data.json`.
+2. Validates email and phone number formats.
+3. Cleans and standardizes lead information.
+4. Identifies duplicate leads using phone numbers.
+5. Groups multiple inquiries under a single lead profile.
+6. Stores processed lead profiles in `analyzed_leads.json`.
 
-#### POST /analyze: Import and analyze provided lead data JSON and store the analyzed data in a JSON file
+---
 
-#### GET /lead/:leadPhoneNumber: Returns a detailed profile of a specific lead by phone number which should include all sale and rental lead data related to that phone number
+## Duplicate Handling
 
-#### (🌟 Bonus Point) GET /leadSummary: Provides a summary of lead profiling metrics like total leads, unique locations, etc
+Phone number is treated as the unique identifier for a lead.
+
+If multiple records share the same phone number, they are consolidated into a single Lead Profile while preserving all associated inquiries.
+
+Example:
+
+* Sale Inquiry
+* Rental Inquiry
+
+Both records are stored under the same profile when the phone number matches.
+
+---
+
+## APIs Implemented
+
+### POST /analyze
+
+Imports, validates, cleans, profiles, and stores lead data.
+
+### GET /lead/:leadPhoneNumber
+
+Returns the complete lead profile associated with a phone number, including all related inquiries.
+
+### GET /leadSummary
+
+Returns lead analytics including:
+
+* Total Leads
+* Unique Location Count
+* Average Budget for Sale Leads
+* Average Budget for Rental Leads
+* Inquiry Frequency by Month
+
+---
+
+## Bonus Features Implemented
+
+### Average Budget by Lead Type
+
+Calculated separately for:
+
+* Sale Leads
+* Rental Leads
+
+### Inquiry Rate Analysis
+
+Inquiry frequency is calculated using contact dates and grouped by month.
+
+### Lead Consolidation
+
+Multiple inquiries from the same customer are grouped into a single lead profile using phone number matching.
+
+---
+
+## Assumptions
+
+* Phone number is treated as the unique identifier as specified in the assignment.
+* Invalid records (invalid email or phone number) are excluded during analysis.
+* Lead summary metrics are generated from validated lead data.
