@@ -53,10 +53,11 @@ export class LeadService {
         }
 
         const profiles = [...profileMap.values()];
+        const summary = Metrics.getSummary(cleanedLeads);
 
         fs.writeFileSync(
             this.outputFile,
-            JSON.stringify(profiles, null, 2)
+            JSON.stringify({ profiles, summary }, null, 2)
         );
 
         return {
@@ -76,7 +77,7 @@ export class LeadService {
             fs.readFileSync(this.outputFile, "utf-8")
         );
 
-        return data.find(
+        return data.profiles.find(
             (lead: LeadProfile) => lead.phone === phone
         );
     }
@@ -86,16 +87,10 @@ export class LeadService {
             return Metrics.getSummary([]);
         }
 
-        const profiles: LeadProfile[] = JSON.parse(
+        const data = JSON.parse(
             fs.readFileSync(this.outputFile, "utf-8")
         );
 
-        const leads = profiles.flatMap(profile => profile.inquiries);
-        const summary = Metrics.getSummary(leads);
-
-        return {
-            ...summary,
-            totalLeads: profiles.length
-        };
+        return data.summary;
     }
 }

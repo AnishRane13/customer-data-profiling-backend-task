@@ -7,7 +7,7 @@ import {
 import { inject } from "inversify";
 import { LeadService } from "../services/lead.service";
 
-@controller("/lead")
+@controller("")
 export class LeadController {
 
     constructor(
@@ -19,15 +19,15 @@ export class LeadController {
         return this.leadService.analyze();
     }
 
-    @httpGet("/summary/all")
-    getSummary() {
-        return this.leadService.getSummary();
-    }
-
-    @httpGet("/:phone")
+    @httpGet("/lead/:phone")
     getLead(
         @requestParam("phone") phone: string
     ) {
         return this.leadService.getLead(phone);
+    }
+
+    @httpGet("/leadSummary")
+    getSummary() {
+        return this.leadService.getSummary();
     }
 }
